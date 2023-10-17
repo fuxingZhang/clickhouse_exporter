@@ -8,9 +8,11 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
+
 	"github.com/fuxingZhang/clickhouse_exporter/pkg/collector"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/log"
 )
 
 const (
@@ -20,19 +22,21 @@ const (
 // Exporter collects clickhouse stats from the given URI and exports them using
 // the prometheus metrics package.
 type Exporter struct {
-	client *http.Client
-
-	scrapeFailures prometheus.Counter
-
 	user     string
 	password string
 
 	collectors          []collector.Collector
 	collectorMetricURIs map[collector.Collector]string
+
+	client *http.Client
+
+	scrapeFailures prometheus.Counter
+
+	logger log.Logger
 }
 
 // NewExporter returns an initialized Exporter.
-func NewExporter(uri url.URL, insecure bool, user, password string) *Exporter {
+func NewExporter(uri url.URL, insecure bool, user, password string, logger log.Logger) *Exporter {
 	var collectors = []collector.Collector{}
 	var collectorMetricURIs = map[collector.Collector]string{}
 	for v, enable := range collector.Collectors {
@@ -47,6 +51,8 @@ func NewExporter(uri url.URL, insecure bool, user, password string) *Exporter {
 	}
 
 	return &Exporter{
+		user:                user,
+		password:            password,
 		collectors:          collectors,
 		collectorMetricURIs: collectorMetricURIs,
 		scrapeFailures: prometheus.NewCounter(prometheus.CounterOpts{
@@ -60,8 +66,7 @@ func NewExporter(uri url.URL, insecure bool, user, password string) *Exporter {
 			},
 			Timeout: 30 * time.Second,
 		},
-		user:     user,
-		password: password,
+		logger: logger,
 	}
 }
 
@@ -126,7 +131,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	upValue := 1
 
 	if err := e.collect(ch); err != nil {
-		log.Printf("Error scraping clickhouse: %s", err)
+		level.Error(e.logger).Log("msg", "Error scraping target", "err", err)
 		e.scrapeFailures.Inc()
 		e.scrapeFailures.Collect(ch)
 

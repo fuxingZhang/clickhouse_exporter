@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/common/promlog"
 )
 
 func TestScrape(t *testing.T) {
@@ -12,7 +13,8 @@ func TestScrape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	exporter := NewExporter(*clickhouseURL, false, "", "")
+	logger := promlog.New(&promlog.Config{})
+	exporter := NewExporter(*clickhouseURL, false, "", "", logger)
 
 	t.Run("Describe", func(t *testing.T) {
 		ch := make(chan *prometheus.Desc)
