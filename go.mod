@@ -3,8 +3,16 @@ module github.com/ClickHouse/clickhouse_exporter
 go 1.20
 
 require (
+	github.com/alecthomas/kingpin/v2 v2.3.1
 	github.com/prometheus/client_golang v1.15.1
 	github.com/prometheus/log v0.0.0-20151026012452-9a3136781e1f
+)
+
+require (
+	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+	github.com/go-kit/log v0.2.1 // indirect
+	github.com/go-logfmt/logfmt v0.5.1 // indirect
+	github.com/xhit/go-str2duration v1.2.0 // indirect
 )
 
 require (
@@ -14,7 +22,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.42.0 // indirect
+	github.com/prometheus/common v0.42.0
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/sirupsen/logrus v1.9.2 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
