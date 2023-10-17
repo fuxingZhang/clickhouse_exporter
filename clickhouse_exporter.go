@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/ClickHouse/clickhouse_exporter/exporter"
 	"github.com/alecthomas/kingpin/v2"
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/exporter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"

@@ -2,7 +2,7 @@ go:
     # This must match .circle/config.yml.
     version: 1.17
 repository:
-    path: github.com/ClickHouse/clickhouse_exporter
+    path: github.com/fuxingZhang/clickhouse_exporter
 build:
     binaries:
         - name: clickhouse_exporter

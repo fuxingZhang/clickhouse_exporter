@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ClickHouse/clickhouse_exporter/util"
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/util"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

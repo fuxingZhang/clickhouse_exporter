@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/ClickHouse/clickhouse_exporter/collector"
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/collector"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/log"
 )
