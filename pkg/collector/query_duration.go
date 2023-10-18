@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/db"
 	"github.com/fuxingZhang/clickhouse_exporter/pkg/util"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -23,7 +24,7 @@ func (c *queryDurationCollector) Name() string {
 	return "query_duration"
 }
 
-func (c *queryDurationCollector) Query() string {
+func (c *queryDurationCollector) SQL() string {
 	return util.FormatSQL(`
 	SELECT
 		query,
@@ -41,8 +42,8 @@ func (c *queryDurationCollector) Query() string {
 	`)
 }
 
-func (c *queryDurationCollector) Collect(ch chan<- prometheus.Metric, data []byte) error {
-	queryDurationMetrics, err := parseQueryResponse(data)
+func (c *queryDurationCollector) Collect(ch chan<- prometheus.Metric) error {
+	queryDurationMetrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
@@ -52,8 +53,8 @@ func (c *queryDurationCollector) Collect(ch chan<- prometheus.Metric, data []byt
 			Namespace: namespace,
 			Name:      "query_duration_ms",
 			Help:      "The number of milliseconds spent on query.",
-		}, []string{"sql", "top"}).WithLabelValues(m.key, strconv.Itoa(i+1))
-		newMetric.Set(m.value)
+		}, []string{"sql", "top"}).WithLabelValues(m.Key, strconv.Itoa(i+1))
+		newMetric.Set(m.Val)
 		newMetric.Collect(ch)
 	}
 

@@ -3,6 +3,7 @@ package collector
 import (
 	"fmt"
 
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/db"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -21,12 +22,12 @@ func (c *metricsCollector) Name() string {
 	return "metrics"
 }
 
-func (c *metricsCollector) Query() string {
+func (c *metricsCollector) SQL() string {
 	return `select metric, value from system.metrics`
 }
 
-func (c *metricsCollector) Collect(ch chan<- prometheus.Metric, data []byte) error {
-	metrics, err := parseKeyValueResponse(data)
+func (c *metricsCollector) Collect(ch chan<- prometheus.Metric) error {
+	metrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
@@ -34,10 +35,10 @@ func (c *metricsCollector) Collect(ch chan<- prometheus.Metric, data []byte) err
 	for _, m := range metrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
-			Name:      metricName(m.key),
-			Help:      "Number of " + m.key + " currently processed",
+			Name:      metricName(m.Key),
+			Help:      "Number of " + m.Key + " currently processed",
 		}, []string{}).WithLabelValues()
-		newMetric.Set(m.value)
+		newMetric.Set(m.Val)
 		newMetric.Collect(ch)
 	}
 	return nil

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/db"
 	"github.com/fuxingZhang/clickhouse_exporter/pkg/util"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -23,7 +24,7 @@ func (c *queryMemoryCollector) Name() string {
 	return "query_memory"
 }
 
-func (c *queryMemoryCollector) Query() string {
+func (c *queryMemoryCollector) SQL() string {
 	return util.FormatSQL(`
 	SELECT
 		query,
@@ -41,19 +42,19 @@ func (c *queryMemoryCollector) Query() string {
 	`)
 }
 
-func (c *queryMemoryCollector) Collect(ch chan<- prometheus.Metric, data []byte) error {
-	queryMemoryMetrics, err := parseQueryResponse(data)
+func (c *queryMemoryCollector) Collect(ch chan<- prometheus.Metric) error {
+	queryMemoryMetrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for i, m := range queryMemoryMetrics {
+	for i, v := range queryMemoryMetrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "query_memory_usage_bytes",
 			Help:      "The number of memory bytes used by query",
-		}, []string{"sql", "top"}).WithLabelValues(m.key, strconv.Itoa(i+1))
-		newMetric.Set(m.value)
+		}, []string{"sql", "top"}).WithLabelValues(v.Key, strconv.Itoa(i+1))
+		newMetric.Set(v.Val)
 		newMetric.Collect(ch)
 	}
 

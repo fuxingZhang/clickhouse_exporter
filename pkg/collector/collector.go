@@ -11,20 +11,15 @@ const (
 	namespace = "clickhouse" // For Prometheus metrics.
 )
 
-const (
-	defaultEnabled  = true
-	defaultDisabled = false
-)
-
 // Collectors Collectors
 var Collectors = map[Collector]*bool{}
 
 // Collector is the interface a collector has to implement.
 type Collector interface {
 	Name() string
-	Query() string
+	SQL() string
 	// Get new metrics and expose them via prometheus registry.
-	Collect(ch chan<- prometheus.Metric, data []byte) error
+	Collect(ch chan<- prometheus.Metric) error
 }
 
 func registerCollector(collector Collector, isDefaultEnabled bool) {

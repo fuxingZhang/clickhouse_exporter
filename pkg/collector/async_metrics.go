@@ -3,6 +3,7 @@ package collector
 import (
 	"fmt"
 
+	"github.com/fuxingZhang/clickhouse_exporter/pkg/db"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -21,23 +22,23 @@ func (c *asyncMetricsCollector) Name() string {
 	return "async_metrics"
 }
 
-func (c *asyncMetricsCollector) Query() string {
+func (c *asyncMetricsCollector) SQL() string {
 	return `select replaceRegexpAll(toString(metric), '-', '_') AS metric, value from system.asynchronous_metrics`
 }
 
-func (c *asyncMetricsCollector) Collect(ch chan<- prometheus.Metric, data []byte) error {
-	asyncMetrics, err := parseKeyValueResponse(data)
+func (c *asyncMetricsCollector) Collect(ch chan<- prometheus.Metric) error {
+	asyncMetrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for _, am := range asyncMetrics {
+	for _, v := range asyncMetrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
-			Name:      metricName(am.key),
-			Help:      "Number of " + am.key + " async processed",
+			Name:      metricName(v.Key),
+			Help:      "Number of " + v.Key + " async processed",
 		}, []string{}).WithLabelValues()
-		newMetric.Set(am.value)
+		newMetric.Set(v.Val)
 		newMetric.Collect(ch)
 	}
 
