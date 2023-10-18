@@ -81,22 +81,10 @@ func main() {
 	}
 	level.Info(logger).Log("Scraping", *clickhouseScrapeURI)
 
-	// registerer := prometheus.DefaultRegisterer
-	// gatherer := prometheus.DefaultGatherer
-	// if *clickhouseOnly {
-	// 	reg := prometheus.NewRegistry()
-	// 	registerer = reg
-	// 	gatherer = reg
-	// }
-
-	e := exporter.NewExporter(*uri, *insecure, *user, *password, logger)
-	// registerer.MustRegister(e)
-
-	// http.Handle(*metricsPath, promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{}))
-
 	runtime.GOMAXPROCS(*maxProcs)
 	level.Debug(logger).Log("msg", "Go MAXPROCS", "procs", runtime.GOMAXPROCS(0))
 
+	e := exporter.NewExporter(*uri, *insecure, *user, *password, logger)
 	http.Handle(*metricsPath, handler(*includeExporterMetrics, *maxRequests, e, logger))
 
 	if *metricsPath != "/" {

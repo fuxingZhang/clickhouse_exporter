@@ -1,6 +1,6 @@
 go:
-    # This must match .circle/config.yml.
-    version: 1.17
+    version: 1.21
+    cgo: false
 repository:
     path: github.com/fuxingZhang/clickhouse_exporter
 build:
@@ -18,3 +18,8 @@ tarball:
     files:
         - LICENSE
         - NOTICE
+crossbuild:
+    platforms:
+        - linux/amd64
+        - linux/arm64
+        # - windows/amd64

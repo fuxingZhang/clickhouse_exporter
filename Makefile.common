@@ -78,7 +78,7 @@ ifneq ($(shell which gotestsum),)
 endif
 endif
 
-PROMU_VERSION ?= 0.13.0
+PROMU_VERSION ?= 0.15.0
 PROMU_URL     := https://github.com/prometheus/promu/releases/download/v$(PROMU_VERSION)/promu-$(PROMU_VERSION).$(GO_BUILD_PLATFORM).tar.gz
 
 GOLANGCI_LINT :=
@@ -239,10 +239,25 @@ endif
 .PHONY: common-build
 common-build: promu
 	@echo ">> building binaries"
-	rm -rf dist
-	# $(PROMU) build --prefix $(PREFIX) $(PROMU_BINARIES)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(PROMU) build --prefix $(PREFIX)/dist/amd64 $(PROMU_BINARIES)
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(PROMU) build --prefix $(PREFIX)/dist/arm64 $(PROMU_BINARIES)
+	$(PROMU) build --prefix $(PREFIX) $(PROMU_BINARIES)
+
+# crossbuild download promu failed
+# .PHONY: common-build
+# common-build: 
+# 	@echo ">> building binaries"
+# 	go build -o $(PREFIX)
+
+# .PHONY: common-build
+# common-build: promu
+# 	@echo ">> building binaries"
+# 	rm -rf dist
+# 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(PROMU) build --prefix $(PREFIX)/dist/amd64 $(PROMU_BINARIES)
+# 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(PROMU) build --prefix $(PREFIX)/dist/arm64 $(PROMU_BINARIES)
+
+.PHONY: common-crossbuild
+common-crossbuild: promu
+	@echo ">> crossbuilding binaries"
+	$(PROMU) crossbuild
 
 .PHONY: common-tarball
 common-tarball: promu

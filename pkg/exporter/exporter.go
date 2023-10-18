@@ -98,10 +98,8 @@ func (e *Exporter) handleResponse(c collector.Collector) ([]byte, error) {
 	}
 
 	// https://clickhouse.com/docs/zh/interfaces/formats#json
-	// req.Header.Set("X-ClickHouse-Format", "TabSeparated")
-	// if c.Name() == "query_duration" || c.Name() == "query_memory" {
-	// 	req.Header.Set("X-ClickHouse-Format", "JSON")
-	// }
+	// req.Header.Set("X-ClickHouse-Format", "TabSeparated") // default
+	req.Header.Set("X-ClickHouse-Format", "JSON")
 
 	if e.user != "" && e.password != "" {
 		req.Header.Set("X-ClickHouse-User", e.user)
