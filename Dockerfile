@@ -15,5 +15,5 @@ COPY --from=BUILDER /go/bin/clickhouse_exporter /usr/local/bin/clickhouse_export
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["/usr/local/bin/clickhouse_exporter"]
-CMD ["-scrape_uri=http://localhost:8123"]
+CMD ["-d=http://localhost:8123"]
 EXPOSE 9116

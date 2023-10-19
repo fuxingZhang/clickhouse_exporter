@@ -27,12 +27,12 @@ func (c *eventsCollector) SQL() string {
 }
 
 func (c *eventsCollector) Collect(ch chan<- prometheus.Metric) error {
-	events, err := db.GetKeyValueData(c.SQL())
+	metrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for _, v := range events {
+	for _, v := range metrics {
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				namespace+"_"+metricName(v.Key)+"_total",

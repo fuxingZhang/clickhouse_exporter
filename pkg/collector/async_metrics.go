@@ -27,12 +27,12 @@ func (c *asyncMetricsCollector) SQL() string {
 }
 
 func (c *asyncMetricsCollector) Collect(ch chan<- prometheus.Metric) error {
-	asyncMetrics, err := db.GetKeyValueData(c.SQL())
+	metrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for _, v := range asyncMetrics {
+	for _, v := range metrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      metricName(v.Key),

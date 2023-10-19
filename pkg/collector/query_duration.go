@@ -17,8 +17,7 @@ func newQueryDurationCollector() Collector {
 	return &queryDurationCollector{}
 }
 
-type queryDurationCollector struct {
-}
+type queryDurationCollector struct{}
 
 func (c *queryDurationCollector) Name() string {
 	return "query_duration"
@@ -43,18 +42,18 @@ func (c *queryDurationCollector) SQL() string {
 }
 
 func (c *queryDurationCollector) Collect(ch chan<- prometheus.Metric) error {
-	queryDurationMetrics, err := db.GetKeyValueData(c.SQL())
+	metrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for i, m := range queryDurationMetrics {
+	for i, v := range metrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "query_duration_ms",
 			Help:      "The number of milliseconds spent on query.",
-		}, []string{"sql", "top"}).WithLabelValues(m.Key, strconv.Itoa(i+1))
-		newMetric.Set(m.Val)
+		}, []string{"sql", "top"}).WithLabelValues(v.Key, strconv.Itoa(i+1))
+		newMetric.Set(v.Val)
 		newMetric.Collect(ch)
 	}
 

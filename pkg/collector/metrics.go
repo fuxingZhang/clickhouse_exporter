@@ -32,13 +32,13 @@ func (c *metricsCollector) Collect(ch chan<- prometheus.Metric) error {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for _, m := range metrics {
+	for _, v := range metrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
-			Name:      metricName(m.Key),
-			Help:      "Number of " + m.Key + " currently processed",
+			Name:      metricName(v.Key),
+			Help:      "Number of " + v.Key + " currently processed",
 		}, []string{}).WithLabelValues()
-		newMetric.Set(m.Val)
+		newMetric.Set(v.Val)
 		newMetric.Collect(ch)
 	}
 	return nil

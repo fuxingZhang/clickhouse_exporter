@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"regexp"
 	"runtime"
-	"time"
 
 	stdlog "log"
 
@@ -26,7 +24,9 @@ import (
 )
 
 var (
-	metricsPath = kingpin.Flag(
+	// --web.listen-address=:9116
+	toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9116")
+	metricsPath  = kingpin.Flag(
 		"web.telemetry-path",
 		"Path under which to expose metrics.",
 	).Default("/metrics").String()
@@ -41,28 +41,10 @@ var (
 	maxProcs = kingpin.Flag(
 		"runtime.gomaxprocs", "The target number of CPUs Go will run on (GOMAXPROCS)",
 	).Envar("GOMAXPROCS").Default("1").Int()
-	toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9116")
-	ip           = kingpin.Flag("ip", "clickhouse ip address.").Default("127.0.0.1").IP()
-	tcpPort      = kingpin.Flag("tcp-port", "clickhouse tcp port.").Int()
-	httpPort     = kingpin.Flag("http-port", "clickhouse http port.").Default("8123").Int()
-	insecure     = kingpin.Flag(
-		"insecure",
-		"Ignore server certificate",
-	).Default("true").Bool()
-	user = kingpin.Flag(
-		"user",
-		"user for clickhouse",
-	).Envar("CLICKHOUSE_USER").String()
-	password = kingpin.Flag(
-		"password",
-		"password for clickhouse",
-	).Envar("CLICKHOUSE_PASSWORD").String()
-
-	maxExecutionTime = kingpin.Flag("max-execution-time", "clickhouse client option MaxExecutionTime in seconds").Default("120").Int()
-	maxIdleConns     = kingpin.Flag("max-idle-conns", "clickhouse client option MaxIdleConns").Default("5").Int()
-	maxOpenConns     = kingpin.Flag("max-open-conns", "clickhouse client option maxOpenConns").Default("5").Int()
-	dialTimeout      = kingpin.Flag("dial-timeout", "clickhouse client option Dialtimeout in seconds").Default("30").Int()
-	connMaxLifetime  = kingpin.Flag("conn-max-lifetime", "clickhouse client option ConnMaxLifetime in minute").Default("60").Int()
+	dsn = kingpin.Flag(
+		"data-source-dsn",
+		"clickhouse data source uri(dsn for gorm).",
+	).Default("http://127.0.0.1:8123").Short('d').String()
 )
 
 func main() {
@@ -80,28 +62,8 @@ func main() {
 	runtime.GOMAXPROCS(*maxProcs)
 	level.Debug(logger).Log("msg", "Go MAXPROCS", "procs", runtime.GOMAXPROCS(0))
 
-	var opt = db.Option{
-		MaxExecutionTime:   *maxExecutionTime,
-		MaxIdleConns:       *maxIdleConns,
-		MaxOpenConns:       *maxOpenConns,
-		ConnMaxLifetime:    time.Duration(*connMaxLifetime) * time.Minute,
-		InsecureSkipVerify: *insecure,
-		DialTimeout:        time.Duration(*dialTimeout) * time.Second,
-	}
-	var addr string
-	if *tcpPort != 0 {
-		addr = fmt.Sprintf("%s:%d", *ip, *tcpPort)
-		db.InitTCPClient(addr, *user, *password, opt)
-	} else {
-		addr = fmt.Sprintf("%s:%d", *ip, *httpPort)
-		db.InitHTTPClient(addr, *user, *password, opt)
-	}
-	level.Info(logger).Log("Scraping", tcpPort)
-
-	if err := db.Ping(); err != nil {
+	if err := db.NewClient(*dsn); err != nil {
 		level.Error(logger).Log("msg", "clickhouse ping error", "err", err)
-	} else {
-		level.Info(logger).Log("msg", "clickhouse ping success")
 	}
 
 	e := exporter.NewExporter(logger)

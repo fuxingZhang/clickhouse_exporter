@@ -17,23 +17,29 @@ Help on flags:
 ./clickhouse_exporter --help
 ```
 
-Credentials(if not default):
+## Usage
 
-via environment variables
+```bash
+# http
+./clickhouse-exporter --data-source-dsn=http://localhost:8123?username=xx&password=xx&read_timeout=60s
+./clickhouse-exporter -d=http://localhost:8123?username=xx&password=xx&read_timeout=60s
+# tcp
+./clickhouse-exporter --data-source-dsn=tcp://localhost:9000?username=xx&password=xx&read_timeout=60s
+./clickhouse-exporter -d=tcp://localhost:9000?username=xx&password=xx&read_timeout=60s
 ```
-CLICKHOUSE_USER
-CLICKHOUSE_PASSWORD
-```
+
 
 ## Build Docker image
 ```
-docker build . -t clickhouse-exporter
+docker build -t clickhouse-exporter .
 ```
 
 ## Using Docker
 
 ```
-docker run -d -p 9116:9116 clickhouse-exporter [-ip=clickhouse_ip] [-tcp-port=9000] [-http-port=8123]
+docker run -d -p 9116:9116 clickhouse-exporter --data-source-dsn=tcp://localhost:9000?&username=xx&password=xx
+docker run -d -p 9116:9116 clickhouse-exporter -d=tcp://localhost:9000?&username=xx&password=xx
 ```
+
 ## Sample dashboard
 Grafana dashboard could be a start for inspiration https://grafana.com/grafana/dashboards/882-clickhouse

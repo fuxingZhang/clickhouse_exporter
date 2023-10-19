@@ -27,7 +27,16 @@ func (c *diskCollector) SQL() string {
 }
 
 func (c *diskCollector) Collect(ch chan<- prometheus.Metric) error {
-	metrics, err := db.GetDiskData(c.SQL())
+	type DiskData struct {
+		Disk       string  `gorm:"column:name"`
+		FreeSpace  float64 `gorm:"column:free_space_in_bytes"`
+		TotalSpace float64 `gorm:"column:total_space_in_bytes"`
+	}
+
+	var metrics []DiskData
+
+	err := db.DB.Raw(c.SQL()).Scan(&metrics).Error
+	// err := db.DB.Raw(c.SQL()).Find(&metrics).Error
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}

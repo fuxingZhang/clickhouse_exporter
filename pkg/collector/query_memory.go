@@ -17,8 +17,7 @@ func newQueryMemoryCollector() Collector {
 	return &queryMemoryCollector{}
 }
 
-type queryMemoryCollector struct {
-}
+type queryMemoryCollector struct{}
 
 func (c *queryMemoryCollector) Name() string {
 	return "query_memory"
@@ -43,12 +42,12 @@ func (c *queryMemoryCollector) SQL() string {
 }
 
 func (c *queryMemoryCollector) Collect(ch chan<- prometheus.Metric) error {
-	queryMemoryMetrics, err := db.GetKeyValueData(c.SQL())
+	metrics, err := db.GetKeyValueData(c.SQL())
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for i, v := range queryMemoryMetrics {
+	for i, v := range metrics {
 		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "query_memory_usage_bytes",

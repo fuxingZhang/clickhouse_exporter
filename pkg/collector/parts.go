@@ -27,7 +27,17 @@ func (c *partsCollector) SQL() string {
 }
 
 func (c *partsCollector) Collect(ch chan<- prometheus.Metric) error {
-	metrics, err := db.GetPartsData(c.SQL())
+	type PartsData struct {
+		Database string
+		Table    string
+		Bytes    float64
+		Parts    float64
+		Rows     float64
+	}
+
+	var metrics []PartsData
+
+	err := db.DB.Raw(c.SQL()).Scan(&metrics).Error
 	if err != nil {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
