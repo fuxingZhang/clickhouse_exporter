@@ -14,7 +14,7 @@ To run it:
 
 Help on flags:
 ```bash
-./clickhouse_exporter --help
+./clickhouse_exporter -h
 ```
 
 Credentials(if not default):
@@ -27,13 +27,14 @@ CLICKHOUSE_PASSWORD
 
 ## Build Docker image
 ```
-docker build . -t clickhouse-exporter
+docker build -t clickhouse-exporter .
 ```
 
 ## Using Docker
 
 ```
-docker run -d -p 9116:9116 clickhouse-exporter [-ip=clickhouse_ip] [-tcp-port=9000] [-http-port=8123]
+docker run -d -p 9116:9116 clickhouse-exporter --uri=http://127.0.0.1:8123
+docker run -d -p 9116:9116 clickhouse-exporter --uri=tcp://127.0.0.1:9000
 ```
 ## Sample dashboard
 Grafana dashboard could be a start for inspiration https://grafana.com/grafana/dashboards/882-clickhouse
