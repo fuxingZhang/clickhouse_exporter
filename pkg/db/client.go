@@ -1,7 +1,6 @@
 package db
 
 import (
-	"crypto/tls"
 	"database/sql"
 	"time"
 
@@ -9,12 +8,11 @@ import (
 )
 
 type Option struct {
-	MaxExecutionTime   int
-	MaxIdleConns       int
-	MaxOpenConns       int
-	ConnMaxLifetime    time.Duration
-	InsecureSkipVerify bool
-	DialTimeout        time.Duration
+	MaxExecutionTime int
+	MaxIdleConns     int
+	MaxOpenConns     int
+	ConnMaxLifetime  time.Duration
+	DialTimeout      time.Duration
 }
 
 var db *sql.DB
@@ -27,9 +25,9 @@ func InitTCPClient(addr, username, password string, opt Option) {
 			Username: username,
 			Password: password,
 		},
-		TLS: &tls.Config{
-			InsecureSkipVerify: true,
-		},
+		// TLS: &tls.Config{
+		// 	InsecureSkipVerify: true,
+		// },
 		Settings: clickhouse.Settings{
 			"max_execution_time": opt.MaxExecutionTime,
 		},
@@ -37,7 +35,7 @@ func InitTCPClient(addr, username, password string, opt Option) {
 		Compression: &clickhouse.Compression{
 			Method: clickhouse.CompressionLZ4,
 		},
-		Debug:                true,
+		Debug:                false,
 		BlockBufferSize:      10,
 		MaxCompressionBuffer: 10240,
 		ClientInfo: clickhouse.ClientInfo{ // optional, please see Client info section in the README.md
