@@ -1,19 +1,31 @@
-FROM golang:1.20 AS BUILDER
+FROM --platform=$BUILDPLATFORM golang:1.21-alpine AS builder
 
-LABEL maintainer="Roman Tkalenko"
+LABEL maintainer="fuxingZhang"
 
-COPY . /go/src/github.com/fuxingZhang/clickhouse_exporter
+ARG TARGETOS
+ARG TARGETARCH
 
-WORKDIR /go/src/github.com/fuxingZhang/clickhouse_exporter
+ENV GO111MODULE=on \
+    GOPROXY=https://goproxy.cn,direct
 
-RUN make init
-RUN make all
+WORKDIR /app
 
-FROM alpine:latest
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 
-COPY --from=BUILDER /go/bin/clickhouse_exporter /usr/local/bin/clickhouse_exporter
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+COPY clickhouse_exporter.go ./main.go
+COPY pkg ./pkg
 
-ENTRYPOINT ["/usr/local/bin/clickhouse_exporter"]
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o clickhouse_exporter main.go
+
+FROM --platform=$TARGETPLATFORM alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/clickhouse_exporter clickhouse_exporter
+# RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["/app/clickhouse_exporter"]
 CMD ["-d=http://localhost:8123"]
 EXPOSE 9116
