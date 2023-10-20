@@ -33,7 +33,7 @@ var (
 	).Default("/metrics").String()
 	includeExporterMetrics = kingpin.Flag(
 		"web.include-exporter-metrics",
-		"Include metrics about the exporter itself (promhttp_*, process_*, go_*).",
+		"Include metrics about the exporter itself (promhttp_*, process_*, go_*) (default: disabled).",
 	).Bool()
 	maxRequests = kingpin.Flag(
 		"web.max-requests",
@@ -80,6 +80,7 @@ func main() {
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.Version(version.Print("clickhouse_exporter"))
+	kingpin.CommandLine.VersionFlag.Short('v')
 	kingpin.CommandLine.UsageWriter(os.Stdout)
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
