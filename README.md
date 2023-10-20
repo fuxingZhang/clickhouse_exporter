@@ -25,6 +25,11 @@ CLICKHOUSE_USER
 CLICKHOUSE_PASSWORD
 ```
 
+## Collectors
+
+Collectors are enabled by providing a `--collector.<name>` flag.
+Collectors that are enabled by default can be disabled by providing a `--no-collector.<name>` flag.
+
 ## Build Docker image
 ```
 docker build -t clickhouse-exporter .
