@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	registerCollector(newQueryMemoryCollector(), true)
+	registerCollector(newQueryMemoryCollector(), false)
 }
 
 func newQueryMemoryCollector() Collector {

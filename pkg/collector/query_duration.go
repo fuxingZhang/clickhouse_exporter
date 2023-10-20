@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	registerCollector(newQueryDurationCollector(), true)
+	registerCollector(newQueryDurationCollector(), false)
 }
 
 func newQueryDurationCollector() Collector {
