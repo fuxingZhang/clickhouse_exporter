@@ -36,7 +36,8 @@ func (c *eventsCollector) Collect(ch chan<- prometheus.Metric) error {
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				namespace+"_"+metricName(v.Key)+"_total",
-				"Number of "+v.Key+" total processed", []string{}, nil),
+				"Number of "+v.Key+" total processed",
+				[]string{}, nil),
 			prometheus.CounterValue, v.Val)
 	}
 

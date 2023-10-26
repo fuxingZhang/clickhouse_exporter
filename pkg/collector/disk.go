@@ -33,21 +33,21 @@ func (c *diskCollector) Collect(ch chan<- prometheus.Metric) error {
 	}
 
 	for _, v := range metrics {
-		newFreeSpaceMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		freeSpaceMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "free_space_in_bytes",
 			Help:      "Disks free_space_in_bytes capacity",
 		}, []string{"disk"}).WithLabelValues(v.Disk)
-		newFreeSpaceMetric.Set(v.FreeSpace)
-		newFreeSpaceMetric.Collect(ch)
+		freeSpaceMetric.Set(v.FreeSpace)
+		freeSpaceMetric.Collect(ch)
 
-		newTotalSpaceMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		totalSpaceMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "total_space_in_bytes",
 			Help:      "Disks total_space_in_bytes capacity",
 		}, []string{"disk"}).WithLabelValues(v.Disk)
-		newTotalSpaceMetric.Set(v.TotalSpace)
-		newTotalSpaceMetric.Collect(ch)
+		totalSpaceMetric.Set(v.TotalSpace)
+		totalSpaceMetric.Collect(ch)
 	}
 
 	return nil
