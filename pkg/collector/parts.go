@@ -55,7 +55,7 @@ func (c *partsCollector) Collect(ch chan<- prometheus.Metric) error {
 			Namespace: namespace,
 			Name:      "table_parts_count",
 			Help:      "Number of parts of the table",
-		}, []string{"D", "table"}).WithLabelValues(v.Database, v.Table)
+		}, []string{"database", "table"}).WithLabelValues(v.Database, v.Table)
 		countMetric.Set(float64(v.Parts))
 		countMetric.Collect(ch)
 
