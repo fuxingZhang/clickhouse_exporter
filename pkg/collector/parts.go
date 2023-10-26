@@ -12,10 +12,34 @@ func init() {
 }
 
 func newPartsCollector() Collector {
-	return &partsCollector{}
+	const subsystem = "table_parts"
+
+	return &partsCollector{
+		bytesMetricVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
+			Name:      "bytes",
+			Help:      "Table size in bytes",
+		}, []string{"database", "table"}),
+		countMetricVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
+			Name:      "count",
+			Help:      "Number of parts of the table",
+		}, []string{"database", "table"}),
+		rowsMetricVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
+			Name:      "rows",
+			Help:      "Number of rows in the table",
+		}, []string{"database", "table"}),
+	}
 }
 
 type partsCollector struct {
+	bytesMetricVec *prometheus.GaugeVec
+	countMetricVec *prometheus.GaugeVec
+	rowsMetricVec  *prometheus.GaugeVec
 }
 
 func (c *partsCollector) Name() string {
@@ -33,27 +57,20 @@ func (c *partsCollector) Collect(ch chan<- prometheus.Metric) error {
 	}
 
 	for _, v := range metrics {
-		bytesMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Namespace: namespace,
-			Name:      "table_parts_bytes",
-			Help:      "Table size in bytes",
-		}, []string{"database", "table"}).WithLabelValues(v.Database, v.Table)
+		labels := prometheus.Labels{
+			"database": v.Database,
+			"table":    v.Table,
+		}
+
+		bytesMetric := c.bytesMetricVec.With(labels)
 		bytesMetric.Set(float64(v.Bytes))
 		bytesMetric.Collect(ch)
 
-		countMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Namespace: namespace,
-			Name:      "table_parts_count",
-			Help:      "Number of parts of the table",
-		}, []string{"database", "table"}).WithLabelValues(v.Database, v.Table)
+		countMetric := c.countMetricVec.With(labels)
 		countMetric.Set(float64(v.Parts))
 		countMetric.Collect(ch)
 
-		rowsMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Namespace: namespace,
-			Name:      "table_parts_rows",
-			Help:      "Number of rows in the table",
-		}, []string{"database", "table"}).WithLabelValues(v.Database, v.Table)
+		rowsMetric := c.rowsMetricVec.With(labels)
 		rowsMetric.Set(float64(v.Rows))
 		rowsMetric.Collect(ch)
 	}

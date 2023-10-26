@@ -33,13 +33,13 @@ func (c *asyncMetricsCollector) Collect(ch chan<- prometheus.Metric) error {
 	}
 
 	for _, v := range asyncMetrics {
-		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		metric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      metricName(v.Key),
 			Help:      "Number of " + v.Key + " async processed",
 		}, []string{}).WithLabelValues()
-		newMetric.Set(v.Val)
-		newMetric.Collect(ch)
+		metric.Set(v.Val)
+		metric.Collect(ch)
 	}
 
 	return nil

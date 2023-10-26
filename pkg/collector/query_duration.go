@@ -14,10 +14,18 @@ func init() {
 }
 
 func newQueryDurationCollector() Collector {
-	return &queryDurationCollector{}
+	return &queryDurationCollector{
+		queryDurationVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: "query",
+			Name:      "duration_ms",
+			Help:      "The number of milliseconds spent on query.",
+		}, []string{"sql", "top"}),
+	}
 }
 
 type queryDurationCollector struct {
+	queryDurationVec *prometheus.GaugeVec
 }
 
 func (c *queryDurationCollector) Name() string {
@@ -48,14 +56,15 @@ func (c *queryDurationCollector) Collect(ch chan<- prometheus.Metric) error {
 		return fmt.Errorf("error scraping clickhouse collector %v: %v", c.Name(), err)
 	}
 
-	for i, m := range queryDurationMetrics {
-		newMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Namespace: namespace,
-			Name:      "query_duration_ms",
-			Help:      "The number of milliseconds spent on query.",
-		}, []string{"sql", "top"}).WithLabelValues(m.Key, strconv.Itoa(i+1))
-		newMetric.Set(m.Val)
-		newMetric.Collect(ch)
+	for i, v := range queryDurationMetrics {
+		// metric := c.queryDurationVec.WithLabelValues(v.Key, strconv.Itoa(i+1))
+		metric := c.queryDurationVec.With(prometheus.Labels{
+			"sql": v.Key,
+			"top": strconv.Itoa(i + 1),
+		})
+
+		metric.Set(v.Val)
+		metric.Collect(ch)
 	}
 
 	return nil
